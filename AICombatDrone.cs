@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 /**
@@ -46,14 +47,50 @@ class AICombatDrone : MonoBehaviour
     // Можно будет менять оружия.
     public List<Transform> weapons = new List<Transform>();
 
+    // Слой врагов.
+    public int enemyLayer = 20;
+
+    // Маска врагов, нужна для поиска врагов в радиусе видимости сенсора.
+    private int enemyMask;
+
     private void Start()
     {
+        enemyMask = 1 << 20;
         basePointPosition = currentPointPosition = transform.position;
         basePointRotate = currentPointRotate = transform.rotation;
 
         if (weapons == null || weapons.Count <= 0)
         {
             // попытаться найти оружие.
+        }
+
+        // Запускаем поиск целей.
+        StartCoroutine(searchTargetsInSensorRadius());
+    }
+
+    /**
+     * Тут будут выполняться простые операции.
+     * 
+     * Например перемещение.
+     */
+    private void Update()
+    {
+        print("update");
+    }
+
+    /**
+     * Ищем цели в радиусе сенсора.
+     */
+    private IEnumerator searchTargetsInSensorRadius()
+    {
+        while(true)
+        {
+            Collider[] colliders = Physics.OverlapSphere(transform.position, sensorRadius);
+            foreach (Collider collider in colliders)
+            {
+                print(collider.name);
+            }
+            yield return null;
         }
     }
 }
