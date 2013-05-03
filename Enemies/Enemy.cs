@@ -2,7 +2,7 @@
 
 class Enemy : MonoBehaviour
 {
-    private GameControll.EnemiesType type;
+    public GameControll.EnemiesType type;
 
     // Установить тип врага.
     public void setEnemyType(GameControll.EnemiesType type)

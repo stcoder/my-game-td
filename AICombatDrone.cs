@@ -23,7 +23,7 @@ class AICombatDrone : MonoBehaviour
     private int maxTargets = 2;
 
     // Список сопровождаемых целей типа Transform.
-    public List<Transform> targets = new List<Transform>();
+    public Transform target = null;
 
     // Радиус сенсоров для определения целей.
     private float sensorRadius = 5.0f;
@@ -88,30 +88,48 @@ class AICombatDrone : MonoBehaviour
     {
         while(true)
         {
-            if (targets.Count <= 0 || targets.Count < maxTargets)
+            Collider[] colliders = Physics.OverlapSphere(transform.position, sensorRadius, enemyMask);
+
+            if (colliders.Length > 0)
             {
-                Collider[] colliders = Physics.OverlapSphere(transform.position, sensorRadius, enemyMask);
                 foreach (Collider collider in colliders)
                 {
-                    if (targets.IndexOf(collider.transform) == -1)
+                    Enemy enemy = collider.gameObject.GetComponent<Enemy>();
+                    if (enemy.getEnemyType() == GameControll.EnemiesType.land)
                     {
-                        targets.Add(collider.transform);
+                        if (target == null)
+                        {
+                            target = collider.transform;
+                            continue;
+                        }
+                    }
+                    else if (enemy.getEnemyType() == GameControll.EnemiesType.flying)
+                    {
+                        if (target != null)
+                        {
+                            Enemy enemyTarget = target.GetComponent<Enemy>();
+                            if (enemyTarget.getEnemyType() != GameControll.EnemiesType.flying)
+                            {
+                                target = collider.transform;
+                            }
+                        }
+                        else
+                        {
+                            target = collider.transform;
+                        }
+                        break;
                     }
                 }
             }
 
 
-            // цикл не пройдет если нет целей.
-            // не понятно как это работает, но работает, ибо просто уже не соображаю %)
-            for (int i = 0; i < targets.Count; i++)
+            if (target != null)
             {
-                Transform target = targets[i];
+                // удаляем цель если она вышла за пределы видимости.
                 float distance = Vector3.Distance(transform.position, target.position);
-                print(Time.deltaTime);
-                print(target.name + " -> " + distance);
                 if (distance > sensorRadius)
                 {
-                    targets.Remove(target);
+                    target = null;
                 }
             }
 
